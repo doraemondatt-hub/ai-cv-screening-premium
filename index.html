@@ -196,6 +196,43 @@
         .badge-success { background: rgba(16, 185, 129, 0.15); color: var(--success); }
         .badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
 
+        /* Test Mode Toggle */
+        .mode-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #333;
+            transition: .4s;
+            border-radius: 20px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px; width: 16px;
+            left: 2px; bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--accent-purple); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
         @media (max-width: 768px) {
             header h1 { font-size: 2.2rem; }
             .card { padding: 20px; }
@@ -211,6 +248,15 @@
             <h1>🤖 AI CV Screening System</h1>
             <p>Hệ thống phân tích hồ sơ thông minh thế hệ mới</p>
         </header>
+
+        <div class="mode-toggle">
+            <span id="modeLabel">Production Mode</span>
+            <label class="switch">
+                <input type="checkbox" id="testModeToggle">
+                <span class="slider"></span>
+            </label>
+            <span>Test Mode</span>
+        </div>
 
         <!-- Card 1: Campaign -->
         <div class="card">
@@ -279,13 +325,24 @@
         /**
          * n8n ENDPOINTS
          */
-        const WEBHOOK_1_URL = "https://dattran1223.id.vn/webhook/cv-evaluate";
-        const WEBHOOK_2_URL = "https://dattran1223.id.vn/webhook/cv-send-mail";
+        const CONFIG = {
+            PRODUCTION: {
+                ANALYZE: "https://dattran1223.id.vn/webhook/phan-tich-cv",
+                REPORT: "https://dattran1223.id.vn/webhook/cv-send-mail"
+            },
+            TEST: {
+                ANALYZE: "https://dattran1223.id.vn/webhook-test/phan-tich-cv",
+                REPORT: "https://dattran1223.id.vn/webhook-test/cv-send-mail"
+            }
+        };
 
         // State
         let uploadedFiles = [];
+        let isTestMode = localStorage.getItem('n8n_test_mode') === 'true';
 
         // Elements
+        const testModeToggle = document.getElementById('testModeToggle');
+        const modeLabel = document.getElementById('modeLabel');
         const dropzone = document.getElementById('dropzone');
         const fileInput = document.getElementById('fileInput');
         const fileList = document.getElementById('fileList');
@@ -299,26 +356,33 @@
         const resultBody = document.getElementById('resultBody');
 
         /**
+         * INITIALIZE MODE
+         */
+        testModeToggle.checked = isTestMode;
+        updateModeUI();
+
+        testModeToggle.onchange = () => {
+            isTestMode = testModeToggle.checked;
+            localStorage.setItem('n8n_test_mode', isTestMode);
+            updateModeUI();
+        };
+
+        function updateModeUI() {
+            modeLabel.innerText = isTestMode ? "Test Mode Active ✅" : "Production Mode";
+            modeLabel.style.color = isTestMode ? "var(--accent-purple)" : "var(--text-dim)";
+        }
+
+        /**
          * HANDLE FILE SELECTION
          */
         dropzone.onclick = () => fileInput.click();
-        
         fileInput.onchange = (e) => handleFiles(e.target.files);
-
         dropzone.ondragover = (e) => { e.preventDefault(); dropzone.classList.add('dragover'); };
         dropzone.ondragleave = () => dropzone.classList.remove('dragover');
-        dropzone.ondrop = (e) => {
-            e.preventDefault();
-            dropzone.classList.remove('dragover');
-            handleFiles(e.dataTransfer.files);
-        };
+        dropzone.ondrop = (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); };
 
         function handleFiles(files) {
-            for (let file of files) {
-                if (!uploadedFiles.find(f => f.name === file.name)) {
-                    uploadedFiles.push(file);
-                }
-            }
+            for (let file of files) { if (!uploadedFiles.find(f => f.name === file.name)) { uploadedFiles.push(file); } }
             renderFiles();
         }
 
@@ -332,10 +396,7 @@
             });
         }
 
-        window.removeFile = (index) => {
-            uploadedFiles.splice(index, 1);
-            renderFiles();
-        };
+        window.removeFile = (index) => { uploadedFiles.splice(index, 1); renderFiles(); };
 
         /**
          * LOGIC: ANALYZE SEQUENTIALLY
@@ -345,16 +406,10 @@
             const jd = document.getElementById('jd').value.trim();
             const emails = document.getElementById('emails').value.trim();
 
-            if (!campaign || !jd) {
-                alert("Vui lòng điền Tên chiến dịch và Mô tả công việc!");
-                return;
-            }
-            if (uploadedFiles.length === 0) {
-                alert("Vui lòng tải lên ít nhất một file CV!");
-                return;
-            }
+            if (!campaign || !jd) { alert("Vui lòng điền Tên chiến dịch và Mô tả công việc!"); return; }
+            if (uploadedFiles.length === 0) { alert("Vui lòng tải lên ít nhất một file CV!"); return; }
 
-            const allResults = [];
+            const currentURLs = isTestMode ? CONFIG.TEST : CONFIG.PRODUCTION;
             resultBody.innerHTML = '';
             btnAnalyze.disabled = true;
             progressArea.style.display = 'block';
@@ -377,22 +432,18 @@
                     formData.append('emails', emails);
                     formData.append('file', file);
 
-                    const response = await fetch(WEBHOOK_1_URL, {
+                    const response = await fetch(currentURLs.ANALYZE, {
                         method: 'POST',
                         body: formData
                     });
 
                     if (!response.ok) throw new Error("Server error");
-
                     const rawResult = await response.json();
                     const result = Array.isArray(rawResult) ? (rawResult[0].json || rawResult[0]) : rawResult;
-                    
-                    allResults.push(result);
                     appendRowToTable(count, result);
-
                 } catch (err) {
                     console.error("Error processing file:", file.name, err);
-                    appendRowToTable(count, { name: file.name, score: 0, comment: "Lỗi xử lý file", conclusion: "FAIL" });
+                    appendRowToTable(count, { name: file.name, score: 0, comment: "Lỗi kết nối hoặc xử lý file", conclusion: "FAIL" });
                 }
             }
 
@@ -408,49 +459,22 @@
             const isPass = score >= 50 || (data.conclusion && data.conclusion.toLowerCase().includes('pass'));
             const badgeType = isPass ? 'badge-success' : 'badge-danger';
             const conclusion = data.conclusion || (isPass ? 'PASS' : 'FAIL');
-
-            row.innerHTML = `
-                <td>${index}</td>
-                <td style="font-weight: 700;">${data.name || 'N/A'}</td>
-                <td style="color: var(--accent-cyan); font-weight: 800;">${score}%</td>
-                <td style="color: var(--text-dim); line-height: 1.4; font-size: 0.85rem;">${data.comment || '-'}</td>
-                <td><span class="badge ${badgeType}">${conclusion}</span></td>
-            `;
+            row.innerHTML = `<td>${index}</td><td style="font-weight: 700;">${data.name || 'N/A'}</td><td style="color: var(--accent-cyan); font-weight: 800;">${score}%</td><td style="color: var(--text-dim); line-height: 1.4; font-size: 0.85rem;">${data.comment || '-'}</td><td><span class="badge ${badgeType}">${conclusion}</span></td>`;
             resultBody.appendChild(row);
         }
 
-        /**
-         * LOGIC: SEND REPORT
-         */
         btnReport.onclick = async () => {
             const campaign = document.getElementById('campaign').value.trim();
-            const emailsRaw = document.getElementById('emails').value;
-            const recipients = emailsRaw.split(',').map(e => e.trim()).filter(e => e !== "");
-
-            if (recipients.length === 0) {
-                alert("Vui lòng nhập email nhận báo cáo!");
-                return;
-            }
-
-            btnReport.disabled = true;
-            btnReport.innerText = "⌛ Đang gửi...";
-
+            const recipients = document.getElementById('emails').value.split(',').map(e => e.trim()).filter(e => e !== "");
+            if (recipients.length === 0) { alert("Vui lòng nhập email!"); return; }
+            btnReport.disabled = true; btnReport.innerText = "⌛ Đang gửi...";
             try {
-                const response = await fetch(WEBHOOK_2_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ campaign, recipients })
-                });
-
+                const currentURLs = isTestMode ? CONFIG.TEST : CONFIG.PRODUCTION;
+                const response = await fetch(currentURLs.REPORT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ campaign, recipients }) });
                 if (!response.ok) throw new Error("Gửi thất bại");
-
-                alert("✅ Báo cáo đã được gửi đến trưởng phòng!");
+                alert("✅ Báo cáo đã được gửi thành công!");
                 btnReport.innerText = "📧 Đã gửi thành công";
-            } catch (err) {
-                alert("❌ Có lỗi xảy ra khi gửi báo cáo.");
-                btnReport.disabled = false;
-                btnReport.innerText = "📧 Gửi Báo Cáo Cho Sếp";
-            }
+            } catch (err) { alert("❌ Lỗi khi gửi báo cáo."); btnReport.disabled = false; btnReport.innerText = "📧 Gửi Báo Cáo Cho Sếp"; }
         };
     </script>
 </body>
