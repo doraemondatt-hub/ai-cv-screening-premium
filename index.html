@@ -75,6 +75,7 @@
             letter-spacing: -2px;
             background: var(--accent-gradient);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 15px;
             filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3));
@@ -592,10 +593,21 @@
                         body: formData
                     });
 
-                    if (!response.ok) throw new Error(`Lỗi kết nối khi phân tích file: ${file.name}`);
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`Server báo lỗi (${response.status}): ${errorText.substring(0, 100)}`);
+                    }
+
+                    const contentType = response.headers.get("content-type");
+                    if (!contentType || !contentType.includes("application/json")) {
+                        const rawText = await response.text();
+                        console.error("Dữ liệu không phải JSON:", rawText);
+                        throw new Error("n8n không trả về kết quả dạng JSON. Hãy kiểm tra lại node 'Respond to Webhook'.");
+                    }
 
                     const result = await response.json();
-                    appendRowToTable(i + 1, result);
+                    const finalData = Array.isArray(result) ? (result[0].json || result[0]) : result;
+                    appendRowToTable(i + 1, finalData);
                 }
 
                 showToast("Tất cả hồ sơ đã được phân tích xong!", "success");
