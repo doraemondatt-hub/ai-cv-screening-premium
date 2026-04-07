@@ -1,26 +1,64 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI CV Screening System | Premium Edition</title>
+    <title>AI CV Screening System | Expert Edition</title>
     <!-- Google Font: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
     <style>
         :root {
-            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            --accent-gradient: linear-gradient(to right, #22d3ee, #3b82f6);
-            --glass-bg: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.08);
+            --primary-bg: #0a0a0c;
+            --accent-purple: #8b5cf6;
+            --accent-cyan: #22d3ee;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
             --text-main: #f8fafc;
             --text-dim: #94a3b8;
-            --success: #22d3ee;
+            --success: #10b981;
             --danger: #ef4444;
-            --card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            --font-main: 'Inter', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-main);
+        }
+
+        body {
+            background-color: var(--primary-bg);
+            background-image: 
+                radial-gradient(circle at 0% 0%, #1e1b4b 0%, transparent 40%),
+                radial-gradient(circle at 100% 100%, #312e81 0%, transparent 40%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 60px 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Ambient Glass Bubbles */
+        .bubble {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.4;
+        }
+        .bubble-1 { width: 400px; height: 400px; background: var(--accent-purple); top: -100px; left: -100px; }
+        .bubble-2 { width: 350px; height: 350px; background: var(--accent-cyan); bottom: -50px; right: -50px; }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            animation: fadeIn 0.8s ease-out;
         }
 
         @keyframes fadeIn {
@@ -28,660 +66,392 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 0 15px rgba(99, 102, 241, 0.1); }
-            50% { box-shadow: 0 0 30px rgba(99, 102, 241, 0.3); }
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-        }
-
-        body {
-            background: #020617;
-            background-image: 
-                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
-            background-attachment: fixed;
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 40px 20px;
-            overflow-x: hidden;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 950px;
-            z-index: 1;
-            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
         header {
             text-align: center;
             margin-bottom: 50px;
-            position: relative;
         }
 
         header h1 {
-            font-size: 3.5rem;
+            font-size: 3rem;
             font-weight: 800;
             letter-spacing: -2px;
-            background: var(--accent-gradient);
+            background: linear-gradient(to right, #fff, var(--text-dim));
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 15px;
-            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3));
+            margin-bottom: 10px;
         }
 
-        /* Test Mode Toggle */
-        .mode-toggle-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
+        header p { color: var(--text-dim); font-size: 1.1rem; }
 
-        .mode-toggle {
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--glass-border);
-            border-radius: 100px;
-            cursor: pointer;
-            transition: 0.3s;
-            font-size: 0.9rem;
-            font-weight: 500;
-            backdrop-filter: blur(10px);
-        }
-
-        .mode-toggle:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255,255,255,0.2);
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 44px;
-            height: 24px;
-        }
-
-        .switch input { opacity: 0; width: 0; height: 0; }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #1e293b;
-            transition: .4s;
-            border-radius: 34px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px; width: 18px;
-            left: 2px; bottom: 2px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        input:checked + .slider { background: var(--primary-gradient); }
-        input:checked + .slider:before { transform: translateX(20px); }
-
-        /* Glass Card Style */
         .card {
             background: var(--glass-bg);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            border-radius: 32px;
-            padding: 40px;
-            margin-bottom: 35px;
-            box-shadow: var(--card-shadow);
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            overflow: hidden;
+            border-radius: 24px;
+            padding: 35px;
+            margin-bottom: 30px;
+            transition: 0.3s ease;
         }
+        .card:hover { border-color: rgba(255,255,255,0.2); }
 
-        .card:hover { 
-            border-color: rgba(255, 255, 255, 0.15);
-            transform: translateY(-5px);
-        }
-
-        .card-title {
-            font-size: 1.35rem;
-            font-weight: 700;
+        .card h2 {
+            font-size: 1.25rem;
             margin-bottom: 25px;
             display: flex;
             align-items: center;
-            gap: 15px;
-            color: #fff;
+            gap: 12px;
+            color: var(--accent-cyan);
         }
 
-        .form-group { margin-bottom: 30px; }
-
-        label {
-            display: block;
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: var(--text-dim);
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
-
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        
         input[type="text"], textarea {
             width: 100%;
-            padding: 16px 20px;
-            background: rgba(15, 23, 42, 0.6);
+            padding: 14px 18px;
+            background: rgba(0,0,0,0.3);
             border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            color: white;
-            font-size: 1.05rem;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1rem;
             outline: none;
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: 0.3s;
         }
+        input:focus, textarea:focus { border-color: var(--accent-purple); box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2); }
+        textarea { height: 150px; resize: none; }
 
-        input:focus, textarea:focus {
-            border-color: #6366f1;
-            box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.15);
-            background: rgba(15, 23, 42, 0.8);
-        }
-
-        textarea { height: 140px; resize: none; line-height: 1.6; }
-
-        /* Dropzone */
+        /* Drag & Drop Zone */
         #dropzone {
-            border: 2px dashed #334155;
-            border-radius: 24px;
-            padding: 60px 20px;
+            border: 2px dashed #475569;
+            border-radius: 16px;
+            padding: 40px 20px;
             text-align: center;
             cursor: pointer;
             transition: 0.3s;
-            position: relative;
-            background: rgba(255,255,255,0.01);
+            background: rgba(255,255,255,0.02);
         }
+        #dropzone:hover, #dropzone.dragover { border-color: var(--accent-cyan); background: rgba(34, 211, 238, 0.05); }
+        #dropzone .icon { font-size: 2.5rem; margin-bottom: 10px; display: block; }
+        #dropzone p { color: var(--text-dim); font-size: 0.95rem; }
 
-        #dropzone:hover {
-            border-color: #6366f1;
-            background: rgba(99, 102, 241, 0.05);
-            transform: scale(0.995);
-        }
-
-        #dropzone span { font-size: 4rem; display: block; margin-bottom: 20px; filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.3)); }
-
-        .file-list { margin-top: 25px; display: flex; flex-wrap: wrap; gap: 12px; }
-
-        .file-chip {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 10px 18px;
+        /* File Chips */
+        .file-list { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px; }
+        .chip {
+            background: rgba(255, 255, 255, 0.07);
+            padding: 8px 15px;
             border-radius: 100px;
-            font-size: 0.9rem;
-            font-weight: 500;
+            font-size: 0.85rem;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             border: 1px solid var(--glass-border);
-            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
-
-        .file-chip button {
-            background: rgba(239, 68, 68, 0.1); border: none; color: #ef4444;
-            width: 24px; height: 24px; border-radius: 50%;
-            cursor: pointer; font-size: 0.8rem; transition: 0.2s;
-            display: flex; align-items: center; justify-content: center;
-        }
-
-        .file-chip button:hover { background: #ef4444; color: white; }
+        .chip .remove-btn { color: var(--danger); cursor: pointer; font-weight: 800; font-size: 1.1rem; }
 
         /* Buttons */
         .btn {
             width: 100%;
-            padding: 20px;
-            border: none;
-            border-radius: 20px;
-            font-size: 1.2rem;
+            padding: 18px;
+            border-radius: 16px;
+            font-size: 1.1rem;
             font-weight: 700;
+            border: none;
             cursor: pointer;
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1);
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
         }
-
         #btnAnalyze {
-            background: var(--primary-gradient);
-            color: white;
-            box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.4);
-            animation: pulseGlow 4s infinite;
+            background: linear-gradient(135deg, var(--accent-purple) 0%, #6d28d9 100%);
+            color: #fff;
+            box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.4);
         }
+        #btnAnalyze:hover { transform: translateY(-2px); box-shadow: 0 15px 35px -5px rgba(139, 92, 246, 0.6); }
+        #btnAnalyze:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-        #btnAnalyze:hover { transform: translateY(-3px); box-shadow: 0 20px 40px -5px rgba(99, 102, 241, 0.5); }
-        #btnAnalyze:active { transform: scale(0.98); }
-        #btnAnalyze:disabled { opacity: 0.6; cursor: not-allowed; animation: none; transform: none; }
-
-        #btnReport { 
-            background: linear-gradient(135deg, #059669 0%, #10b981 100%); 
-            color: white; 
-            margin-top: 30px;
-            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.3);
+        #btnReport {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            color: #fff;
+            margin-top: 20px;
+            display: none;
         }
 
         /* Progress Bar */
-        #progressContainer { display: none; margin: 30px 0; }
-        .progress-text { text-align: center; margin-bottom: 15px; font-size: 1rem; color: var(--text-main); font-weight: 600; }
-        .progress-bar-bg { width: 100%; height: 10px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; overflow: hidden; }
-        .progress-bar-fill { width: 0%; height: 100%; background: var(--accent-gradient); transition: width 0.5s cubic-bezier(0.65, 0, 0.35, 1); }
+        #progressArea { display: none; margin: 30px 0; }
+        .progress-label { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9rem; font-weight: 600; }
+        .progress-bar-container { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(to right, var(--accent-purple), var(--accent-cyan)); transition: width 0.4s ease; }
 
-        /* Table */
-        .table-wrapper { overflow-x: auto; margin-top: 20px; }
-        table { width: 100%; border-collapse: separate; border-spacing: 0 12px; }
-        th { text-align: left; color: var(--text-dim); font-size: 0.85rem; padding: 0 20px; text-transform: uppercase; font-weight: 700; }
-        td { padding: 25px 20px; background: rgba(255, 255, 255, 0.03); border-top: 1px solid rgba(255,255,255,0.05); }
-        td:first-child { border-radius: 16px 0 0 16px; border-left: 1px solid rgba(255,255,255,0.05); }
-        td:last-child { border-radius: 0 16px 16px 0; border-right: 1px solid rgba(255,255,255,0.05); }
+        /* Table Results */
+        #resultArea { display: none; }
+        .table-container { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.95rem; }
+        th { text-align: left; padding: 15px; color: var(--text-dim); border-bottom: 1px solid var(--glass-border); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; }
+        td { padding: 18px 15px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .badge { padding: 5px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
+        .badge-success { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+        .badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
 
-        .badge {
-            padding: 8px 16px; border-radius: 10px; font-size: 0.8rem; 
-            font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
-        }
-        .badge-pass { background: rgba(34, 211, 238, 0.15); color: #22d3ee; border: 1px solid rgba(34, 211, 238, 0.3); }
-        .badge-fail { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
-
-        /* Toast Notifications */
-        #toast-container { position: fixed; top: 30px; right: 30px; z-index: 9999; display: flex; flex-direction: column; gap: 15px; }
-        .toast {
-            background: #1e293b; border: 1px solid var(--glass-border);
-            padding: 18px 28px; border-radius: 20px; color: white;
-            box-shadow: 0 25px 30px -5px rgba(0, 0, 0, 0.4);
-            display: flex; align-items: center; gap: 15px;
-            animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            min-width: 350px; backdrop-filter: blur(15px);
-        }
-        @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-
-        @media (max-width: 600px) {
-            header h1 { font-size: 2.5rem; }
-            .card { padding: 30px 20px; }
-            td { padding: 20px 10px; font-size: 0.9rem; }
+        @media (max-width: 768px) {
+            header h1 { font-size: 2.2rem; }
+            .card { padding: 20px; }
         }
     </style>
 </head>
-
 <body>
-    <!-- Toast Container -->
-    <div id="toast-container"></div>
+    <div class="bubble bubble-1"></div>
+    <div class="bubble bubble-2"></div>
 
     <div class="container">
         <header>
-            <h1>🤖 AI CV Screening</h1>
-            <div class="mode-toggle-container">
-                <div class="mode-toggle" id="modeContainer">
-                    <span id="modeStatus">Chế độ: <strong>Production</strong></span>
-                    <label class="switch">
-                        <input type="checkbox" id="testModeToggle">
-                        <span class="slider"></span>
-                    </label>
-                    <span id="modeText" style="color: var(--text-dim)">Webhook Test Mode OFF</span>
-                </div>
-            </div>
+            <h1>🤖 AI CV Screening System</h1>
+            <p>Hệ thống phân tích hồ sơ thông minh thế hệ mới</p>
         </header>
 
-        <!-- Card 1: Campaign Info -->
+        <!-- Card 1: Campaign -->
         <div class="card">
-            <div class="card-title">📝 Thông Tin Chiến Dịch</div>
+            <h2>📝 Thông Tin Đợt Tuyển</h2>
             <div class="form-group">
-                <label for="campaign">Tên chiến dịch tuyển dụng</label>
-                <input type="text" id="campaign" placeholder="Ví dụ: Senior AI Engineer 2024">
+                <label>Tên chiến dịch</label>
+                <input type="text" id="campaign" placeholder="Ví dụ: Tuyển dụng Software Engineer 2024">
             </div>
             <div class="form-group">
-                <label for="jd">Mô tả công việc (JD)</label>
-                <textarea id="jd" placeholder="Hãy dán các yêu cầu, kỹ năng và trách nhiệm công việc vào đây..."></textarea>
+                <label>Email nhận báo cáo (cách nhau bằng dấu phẩy)</label>
+                <input type="text" id="emails" placeholder="boss@company.com, hr@company.com">
             </div>
             <div class="form-group">
-                <label for="emails">Email nhận báo cáo (Cách nhau bởi dấu phẩy)</label>
-                <input type="text" id="emails" placeholder="ceo@company.com, hr-lead@company.com">
+                <label>Mô tả công việc (JD)</label>
+                <textarea id="jd" placeholder="Hãy dán mô tả công việc cụ thể các kỹ năng cần thiết n8n sẽ dùng để đối chiếu..."></textarea>
             </div>
         </div>
 
         <!-- Card 2: Upload -->
         <div class="card">
-            <div class="card-title">📂 Tải Hồ Sơ Ứng Viên</div>
+            <h2>📂 Tải Hồ Sơ Ứng Viên</h2>
             <div id="dropzone">
-                <span>⚡</span>
-                <p>Kéo thả CV (PDF, DOCX) vào đây hoặc <strong>nhấp để chọn</strong></p>
-                <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 10px;">Hỗ trợ phân tích hàng loạt CV cùng lúc</p>
+                <span class="icon">📂</span>
+                <p>Kéo thả CV vào đây hoặc <strong>nhấp để chọn</strong></p>
+                <p style="font-size: 0.75rem; margin-top: 8px;">Định dạng hỗ trợ: PDF, TXT, DOCX</p>
             </div>
             <input type="file" id="fileInput" multiple accept=".pdf,.txt,.docx" style="display: none;">
-            <div class="file-list" id="fileList"></div>
+            <div id="fileList" class="file-list"></div>
         </div>
 
-        <button id="btnAnalyze" class="btn">🚀 Bắt Đầu Phân Tích Bằng AI</button>
+        <button id="btnAnalyze" class="btn">🚀 Bắt Đầu Phân Tích AI</button>
 
-        <!-- Progress Section -->
-        <div id="progressContainer">
-            <div class="progress-text" id="progressText">Đang chuẩn bị dữ liệu...</div>
-            <div class="progress-bar-bg">
-                <div class="progress-bar-fill" id="progressBarFill"></div>
+        <!-- Progress -->
+        <div id="progressArea">
+            <div class="progress-label">
+                <span id="progressText">Đang chuẩn bị...</span>
+                <span id="progressPercent">0%</span>
+            </div>
+            <div class="progress-bar-container">
+                <div id="progressBar" class="progress-bar-fill"></div>
             </div>
         </div>
 
         <!-- Card 3: Results -->
-        <div id="resultCard" class="card" style="display: none;">
-            <div class="card-title">📊 Kết Quả Phân Tích</div>
-            <div class="table-wrapper">
+        <div id="resultArea" class="card">
+            <h2>📊 Kết Quả Phân Tích</h2>
+            <div class="table-container">
                 <table>
                     <thead>
                         <tr>
                             <th>#</th>
                             <th>Ứng Viên</th>
-                            <th>Độ Phù Hợp</th>
-                            <th>Nhận Xét AI</th>
+                            <th>Điểm (%)</th>
+                            <th>Nhận Xét</th>
                             <th>Kết Luận</th>
                         </tr>
                     </thead>
                     <tbody id="resultBody"></tbody>
                 </table>
             </div>
-            <button id="btnReport" class="btn">📧 Gửi Toàn Bộ Báo Cáo</button>
-        </div>
-
-        <!-- Shortcut for testing cv-send-mail when results are empty -->
-        <div id="testShortcut" style="display: none; margin-top: 20px; text-align: center;">
-            <p style="color: var(--text-dim); font-size: 0.8rem; margin-bottom: 10px;">Chế độ Test: Bạn có thể thử gửi báo cáo ngay</p>
-            <button id="btnTestReport" class="btn" style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #10b981;">
-                📧 Test Gửi Báo Cáo (cv-send-mail)
-            </button>
+            <button id="btnReport" class="btn">📧 Gửi Báo Cáo Cho Sếp</button>
         </div>
     </div>
 
     <script>
         /**
-         * CONFIGURATION
-         * n8n Webhook Management
+         * n8n ENDPOINTS
          */
-        const CONFIG = {
-            PRODUCTION: {
-                ANALYZE: "https://dattran1223.id.vn/webhook/phan-tich-cv",
-                REPORT: "https://dattran1223.id.vn/webhook/cv-send-mail"
-            },
-            TEST: {
-                ANALYZE: "https://dattran1223.id.vn/webhook-test/phan-tich-cv",
-                REPORT: "https://dattran1223.id.vn/webhook-test/cv-send-mail"
-            }
-        };
+        const WEBHOOK_1_URL = "https://dattran1223.id.vn/webhook/cv-evaluate";
+        const WEBHOOK_2_URL = "https://dattran1223.id.vn/webhook/cv-send-mail";
 
-        // Persistent Test Mode State
-        let isTestMode = localStorage.getItem('n8n_test_mode') === 'true';
+        // State
+        let uploadedFiles = [];
 
-        // State Management
-        let selectedFiles = [];
-
-        // DOM Elements
-        const testModeToggle = document.getElementById('testModeToggle');
-        const modeStatus = document.getElementById('modeStatus');
-        const modeText = document.getElementById('modeText');
+        // Elements
         const dropzone = document.getElementById('dropzone');
         const fileInput = document.getElementById('fileInput');
-        const fileListContainer = document.getElementById('fileList');
+        const fileList = document.getElementById('fileList');
         const btnAnalyze = document.getElementById('btnAnalyze');
         const btnReport = document.getElementById('btnReport');
-        const progressContainer = document.getElementById('progressContainer');
+        const progressArea = document.getElementById('progressArea');
+        const progressBar = document.getElementById('progressBar');
         const progressText = document.getElementById('progressText');
-        const progressBarFill = document.getElementById('progressBarFill');
-        const resultCard = document.getElementById('resultCard');
+        const progressPercent = document.getElementById('progressPercent');
+        const resultArea = document.getElementById('resultArea');
         const resultBody = document.getElementById('resultBody');
 
         /**
-         * INITIALIZATION
+         * HANDLE FILE SELECTION
          */
-        function init() {
-            testModeToggle.checked = isTestMode;
-            updateModeUI();
-        }
+        dropzone.onclick = () => fileInput.click();
+        
+        fileInput.onchange = (e) => handleFiles(e.target.files);
 
-        testModeToggle.addEventListener('change', () => {
-            isTestMode = testModeToggle.checked;
-            localStorage.setItem('n8n_test_mode', isTestMode);
-            updateModeUI();
-            showToast(isTestMode ? "🚀 Chế độ CHẠY THỬ đang bật. Webhook sẽ gửi tới /webhook-test/" : "🌐 Đã chuyển sang chế độ PRODUCTION.", "info");
-        });
-
-        function updateModeUI() {
-            modeStatus.innerHTML = isTestMode ? "Chế độ: <strong>Running Test</strong>" : "Chế độ: <strong>Production</strong>";
-            modeText.innerText = isTestMode ? "Webhook Test Mode ON ✅" : "Webhook Test Mode OFF";
-            modeText.style.color = isTestMode ? "var(--success)" : "var(--text-dim)";
-            
-            // Hiện nút test nhanh khi ở chế độ Test
-            document.getElementById('testShortcut').style.display = isTestMode ? 'block' : 'none';
-        }
-
-        /**
-         * NOTIFICATION SYSTEM
-         */
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            const icon = type === 'error' ? '🔴' : (type === 'success' ? '🟢' : '🔵');
-            toast.innerHTML = `<span style="font-size: 1.2rem">${icon}</span> <span>${message}</span>`;
-            container.appendChild(toast);
-            
-            // Auto remove
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(50px)';
-                setTimeout(() => toast.remove(), 400);
-            }, 4000);
-        }
-
-        /**
-         * FILE HANDLING
-         */
-        dropzone.addEventListener('click', () => fileInput.click());
-
-        ['dragover', 'dragenter'].forEach(evt => {
-            dropzone.addEventListener(evt, (e) => {
-                e.preventDefault();
-                dropzone.style.borderColor = '#6366f1';
-                dropzone.style.background = 'rgba(99, 102, 241, 0.08)';
-            });
-        });
-
-        ['dragleave', 'dragend', 'drop'].forEach(evt => {
-            dropzone.addEventListener(evt, () => {
-                dropzone.style.borderColor = '#334155';
-                dropzone.style.background = 'rgba(255,255,255,0.01)';
-            });
-        });
-
-        dropzone.addEventListener('drop', (e) => {
+        dropzone.ondragover = (e) => { e.preventDefault(); dropzone.classList.add('dragover'); };
+        dropzone.ondragleave = () => dropzone.classList.remove('dragover');
+        dropzone.ondrop = (e) => {
             e.preventDefault();
+            dropzone.classList.remove('dragover');
             handleFiles(e.dataTransfer.files);
-        });
-
-        fileInput.addEventListener('change', (e) => {
-            handleFiles(e.target.files);
-        });
+        };
 
         function handleFiles(files) {
-            let addedCount = 0;
             for (let file of files) {
-                if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
-                    selectedFiles.push(file);
-                    addedCount++;
+                if (!uploadedFiles.find(f => f.name === file.name)) {
+                    uploadedFiles.push(file);
                 }
             }
-            renderFileList();
-            if (addedCount > 0) showToast(`Đã tải lên ${addedCount} hồ sơ mới.`, "success");
+            renderFiles();
         }
 
-        function renderFileList() {
-            fileListContainer.innerHTML = '';
-            selectedFiles.forEach((file, index) => {
-                const chip = document.createElement('div');
-                chip.className = 'file-chip';
-                chip.innerHTML = `
-                    <span>📄 ${file.name.length > 25 ? file.name.substring(0, 22) + '...' : file.name}</span>
-                    <button onclick="removeFile(${index}, event)">✕</button>
-                `;
-                fileListContainer.appendChild(chip);
+        function renderFiles() {
+            fileList.innerHTML = '';
+            uploadedFiles.forEach((file, index) => {
+                const item = document.createElement('div');
+                item.className = 'chip';
+                item.innerHTML = `📄 ${file.name.substring(0, 15)}... <span class="remove-btn" onclick="removeFile(${index})">×</span>`;
+                fileList.appendChild(item);
             });
         }
 
-        window.removeFile = (index, event) => {
-            event.stopPropagation();
-            selectedFiles.splice(index, 1);
-            renderFileList();
+        window.removeFile = (index) => {
+            uploadedFiles.splice(index, 1);
+            renderFiles();
         };
 
         /**
-         * CORE LOGIC: ANALYZE
+         * LOGIC: ANALYZE SEQUENTIALLY
          */
-        btnAnalyze.addEventListener('click', async () => {
+        btnAnalyze.onclick = async () => {
             const campaign = document.getElementById('campaign').value.trim();
             const jd = document.getElementById('jd').value.trim();
+            const emails = document.getElementById('emails').value.trim();
 
             if (!campaign || !jd) {
-                showToast("Vui lòng điền đầy đủ Tên chiến dịch và Mô tả công việc!", "error");
+                alert("Vui lòng điền Tên chiến dịch và Mô tả công việc!");
                 return;
             }
-            if (selectedFiles.length === 0) {
-                showToast("Vui lòng tải lên ít nhất một CV để phân tích!", "error");
+            if (uploadedFiles.length === 0) {
+                alert("Vui lòng tải lên ít nhất một file CV!");
                 return;
             }
 
-            const currentURLs = isTestMode ? CONFIG.TEST : CONFIG.PRODUCTION;
-
-            btnAnalyze.disabled = true;
-            btnAnalyze.innerHTML = `<span class="spinner">⏳</span> Đang phân tích...`;
+            const allResults = [];
             resultBody.innerHTML = '';
-            resultCard.style.display = 'none';
-            progressContainer.style.display = 'block';
+            btnAnalyze.disabled = true;
+            progressArea.style.display = 'block';
+            resultArea.style.display = 'none';
 
-            const total = selectedFiles.length;
+            let count = 0;
+            const total = uploadedFiles.length;
 
-            try {
-                for (let i = 0; i < total; i++) {
-                    const file = selectedFiles[i];
-                    const currentCount = i + 1;
-                    
-                    progressText.innerText = `Đang xử lý hồ sơ (${currentCount}/${total}): ${file.name}`;
-                    progressBarFill.style.width = `${(currentCount / total) * 100}%`;
+            for (const file of uploadedFiles) {
+                count++;
+                progressText.innerText = `Đang xử lý: ${count}/${total} (${file.name})`;
+                const perc = Math.round((count / total) * 100);
+                progressBar.style.width = perc + '%';
+                progressPercent.innerText = perc + '%';
 
+                try {
                     const formData = new FormData();
                     formData.append('campaign', campaign);
                     formData.append('jd', jd);
+                    formData.append('emails', emails);
                     formData.append('file', file);
 
-                    const response = await fetch(currentURLs.ANALYZE, {
+                    const response = await fetch(WEBHOOK_1_URL, {
                         method: 'POST',
                         body: formData
                     });
 
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        throw new Error(`Server báo lỗi (${response.status}): ${errorText.substring(0, 100)}`);
-                    }
+                    if (!response.ok) throw new Error("Server error");
 
-                    const contentType = response.headers.get("content-type");
-                    if (!contentType || !contentType.includes("application/json")) {
-                        const rawText = await response.text();
-                        console.error("Dữ liệu không phải JSON:", rawText);
-                        throw new Error("n8n không trả về kết quả dạng JSON. Hãy kiểm tra lại node 'Respond to Webhook'.");
-                    }
+                    const rawResult = await response.json();
+                    const result = Array.isArray(rawResult) ? (rawResult[0].json || rawResult[0]) : rawResult;
+                    
+                    allResults.push(result);
+                    appendRowToTable(count, result);
 
-                    const result = await response.json();
-                    const finalData = Array.isArray(result) ? (result[0].json || result[0]) : result;
-                    appendRowToTable(i + 1, finalData);
+                } catch (err) {
+                    console.error("Error processing file:", file.name, err);
+                    appendRowToTable(count, { name: file.name, score: 0, comment: "Lỗi xử lý file", conclusion: "FAIL" });
                 }
-
-                showToast("Tất cả hồ sơ đã được phân tích xong!", "success");
-                resultCard.style.display = 'block';
-                btnAnalyze.style.display = 'none';
-                btnReport.style.display = 'flex';
-                progressContainer.style.display = 'none';
-
-            } catch (error) {
-                console.error(error);
-                showToast("Gặp sự cố: " + error.message, "error");
-                btnAnalyze.disabled = false;
-                btnAnalyze.innerText = "🚀 Bắt Đầu Phân Tích Lại";
             }
-        });
+
+            progressText.innerText = `Hoàn tất xử lý ${total} hồ sơ!`;
+            btnAnalyze.style.display = 'none';
+            btnReport.style.display = 'flex';
+            resultArea.style.display = 'block';
+        };
 
         function appendRowToTable(index, data) {
             const row = document.createElement('tr');
-            row.style.animation = `fadeIn 0.6s ease-out forwards`;
-            
-            const isPass = data.conclusion?.toLowerCase().includes('pass') || (data.score && data.score >= 50);
-            const conclusionClass = isPass ? 'badge-pass' : 'badge-fail';
-            const conclusionText = data.conclusion || (isPass ? 'PASS' : 'FAIL');
+            const score = data.score || 0;
+            const isPass = score >= 50 || (data.conclusion && data.conclusion.toLowerCase().includes('pass'));
+            const badgeType = isPass ? 'badge-success' : 'badge-danger';
+            const conclusion = data.conclusion || (isPass ? 'PASS' : 'FAIL');
 
             row.innerHTML = `
                 <td>${index}</td>
-                <td style="font-weight:700; color: #fff;">${data.name || 'Không rõ tên'}</td>
-                <td><strong style="color: var(--success); font-size: 1.1rem;">${data.score ?? 0}%</strong></td>
-                <td style="color: var(--text-dim); font-size: 0.85rem; max-width: 350px; line-height: 1.5;">${data.comment || 'Không có nhận xét'}</td>
-                <td><span class="badge ${conclusionClass}">${conclusionText}</span></td>
+                <td style="font-weight: 700;">${data.name || 'N/A'}</td>
+                <td style="color: var(--accent-cyan); font-weight: 800;">${score}%</td>
+                <td style="color: var(--text-dim); line-height: 1.4; font-size: 0.85rem;">${data.comment || '-'}</td>
+                <td><span class="badge ${badgeType}">${conclusion}</span></td>
             `;
             resultBody.appendChild(row);
         }
 
         /**
-         * CORE LOGIC: REPORT
+         * LOGIC: SEND REPORT
          */
-        btnReport.addEventListener('click', async () => {
+        btnReport.onclick = async () => {
             const campaign = document.getElementById('campaign').value.trim();
             const emailsRaw = document.getElementById('emails').value;
             const recipients = emailsRaw.split(',').map(e => e.trim()).filter(e => e !== "");
 
             if (recipients.length === 0) {
-                showToast("Vui lòng nhập email người nhận báo cáo!", "error");
+                alert("Vui lòng nhập email nhận báo cáo!");
                 return;
             }
 
-            const currentURLs = isTestMode ? CONFIG.TEST : CONFIG.PRODUCTION;
             btnReport.disabled = true;
-            btnReport.innerText = "⌛ Đang gửi dữ liệu...";
+            btnReport.innerText = "⌛ Đang gửi...";
 
             try {
-                const response = await fetch(currentURLs.REPORT, {
+                const response = await fetch(WEBHOOK_2_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ campaign, recipients })
                 });
 
-                if (!response.ok) throw new Error("Server từ chối gửi báo cáo.");
-                showToast("Báo cáo đã được gửi đi thành công!", "success");
-            } catch (error) {
-                showToast("Lỗi khi gửi báo cáo: " + error.message, "error");
-            } finally {
+                if (!response.ok) throw new Error("Gửi thất bại");
+
+                alert("✅ Báo cáo đã được gửi đến trưởng phòng!");
+                btnReport.innerText = "📧 Đã gửi thành công";
+            } catch (err) {
+                alert("❌ Có lỗi xảy ra khi gửi báo cáo.");
                 btnReport.disabled = false;
                 btnReport.innerText = "📧 Gửi Báo Cáo Cho Sếp";
             }
-        });
-
-        // Event listener cho nút Test nhanh
-        document.getElementById('btnTestReport').addEventListener('click', () => {
-            btnReport.click(); // Kích hoạt sự kiện gửi báo cáo như bình thường
-        });
-
-        init();
+        };
     </script>
 </body>
 </html>
